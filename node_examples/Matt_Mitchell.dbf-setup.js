@@ -1,11 +1,11 @@
-var credentials = require('./credentials.json');
+var credentials = require('./Matt_credentials.json');
 
 mysql = require("mysql");
 express = require('express');
 Promise = require('bluebird');
 var using = Promise.using;
-Promise.promisifyingAll(require("mysql/lib/Connection").prototype);
-Promise.promisifyingAll(require("mysql/lib/Pool").prototype);
+Promise.promisifyAll(require("mysql/lib/Connection").prototype);
+Promise.promisifyAll(require("mysql/lib/Pool").prototype);
 
 credentials.host="ids";
 var connection = mysql.createConnection(credentials);
@@ -14,7 +14,7 @@ var pool = mysql.createPool(credentials); //Setup the pool useing our credential
 
 var getConnection = function() {
   return pool.getConnectionAsync().disposer(
-    function() {return connection.release();}
+    function(connection) {return connection.release();}
   );
 };
 

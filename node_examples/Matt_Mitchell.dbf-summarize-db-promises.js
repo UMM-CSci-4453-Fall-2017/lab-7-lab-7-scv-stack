@@ -19,10 +19,11 @@ var processTables = function(results){ //Retuns a promes that foces all teble de
 }
 
 var dbfToPromise = function(dbfObj){
-  var dbf = dbfObj.DATABASE
+  var dbf = dbfObj.Database;
   var sql = mysql.format("SHOW TABLES IN ??", dbf);
   var queryPromise = DBF.query(sql)
   queryPromise = queryPromise.then(function(results){return({table:results, dbf:dbf})});
+  return(queryPromise);
 }
 
 var tableAndDbfToPromise=function(obj){

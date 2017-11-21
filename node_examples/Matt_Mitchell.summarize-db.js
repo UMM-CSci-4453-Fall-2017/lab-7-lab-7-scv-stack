@@ -1,4 +1,4 @@
-var credentials = require('./credentials.json');
+var credentials = require('./Matt_credentials.json');
 var mysql = require("mysql");
 var user = credentials.user;
 credentials.host="ids";
@@ -18,21 +18,40 @@ connection.query(sql, function(err, rows, fields){
   }
 });
 
-function processDBFs(dbfs){ // Asynchranous row handler
+function processDBFs(dbfs){
   for(var index in dbfs){
     var dbf = dbfs[index].Database;
-    var sql = 'SHOW TABLES IN' + dbf;
-    data[dbf] = Number.POSITIVE_INFINITY; // Exisits, but not set.
-    connection.query(sql,function(dbf){
-      return function(err, table, fields) {
+    var sql = "SHOW TABLES IN " +dbf;
+    data[dbf] = Number.POSITIVE_INFINITY;
+    connection.query(sql, (function(dbf){
+      return function(err, tables, fields){
         if(err){
-          console.log('Error finding table in dbf' + dbf);
+          console.log("Error finding tables in dbf" + dbf);
           connection.end();
         }else{
-          processTables(tables,dbf);
+          processTables(tables, dbf);
         }
       };
     })(dbf));
+  }
+}
+
+
+function processDBFs(dbfs){
+  for(var index in dbfs){
+    var dbf = dbfs[index].Database;
+    var sql = "SHOW TABLES IN " +dbf;
+      data[dbf] = Number.POSITIVE_INFINITY; //Make sure the value exists, but it not yet set so we can process later.
+      connection.query(sql, (function(dbf){
+        return function(err, tables, fields){
+	  if(err){
+	    console.log("Error finding tables in dbf" + dbf);
+	    connection.end();
+	  } else {
+	    processTables(tables, dbf);
+	  }
+	};
+      })(dbf));
   }
 }
 
@@ -60,13 +79,13 @@ function processTables(tables,dbf){ // Asynchronous row handler
 
 function processDescription(desc,table,dbf){
   data[dbf]--; //Processed one tables
-  if(processed[dfb]==0){
+  if(processed[dbf]==0){
     processed[dbf] = 1;
     console.log('---|' + dbf + '>');
   }
   console.log('.....|' + dbf + '.' + table + '>');
   desc.map(function(field){ //Shows the fields nicely
-    console.log("\t FieldName: + "field.Field" + \t("+field.Type+")");
+    console.log("\t FieldName: `"+field.Field+"`  \t("+field.Type+")");
   });
   if(allZero(data)){connection.end()}
 }
@@ -74,7 +93,7 @@ function processDescription(desc,table,dbf){
 function allZero(object) {
   allzero = true;
   for(obj in object){
-    if(object[obj] !=0){allzero = flase}
+    if(object[obj] !=0){allzero = false}
   }
   return(allzero);
 }
